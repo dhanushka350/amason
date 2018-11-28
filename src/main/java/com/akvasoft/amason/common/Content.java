@@ -9,8 +9,8 @@ public class Content {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     int id;
-    @Column(name = "product_title")
-    String product_title;
+    @Column(name = "productTitle")
+    String productTitle;
     @Column(name = "monthly_revenue")
     String monthly_revenue;
     @Column(name = "avarage_price")
@@ -32,12 +32,12 @@ public class Content {
     @Column(name = "warning")
     String warning;
 
-    public String getProduct_title() {
-        return product_title;
+    public String getProductTitle() {
+        return productTitle;
     }
 
-    public void setProduct_title(String product_title) {
-        this.product_title = product_title;
+    public void setProductTitle(String productTitle) {
+        this.productTitle = productTitle;
     }
 
     public String getMonthly_revenue() {

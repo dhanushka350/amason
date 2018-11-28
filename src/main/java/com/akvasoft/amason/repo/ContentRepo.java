@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ContentRepo extends JpaRepository<Content, Integer> {
+    boolean existsByProductTitleEquals(String s);
 }
