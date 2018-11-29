@@ -1,6 +1,7 @@
 package com.akvasoft.amason.config;
 
 import com.akvasoft.amason.common.Content;
+import com.akvasoft.amason.common.ExcelReader;
 import com.akvasoft.amason.common.Item;
 import com.akvasoft.amason.repo.ContentRepo;
 import com.akvasoft.amason.repo.ItemRepo;
@@ -30,7 +31,7 @@ public class Scrape implements InitializingBean {
     public Scrape() throws AWTException {
     }
 
-    public void initialise() throws Exception {
+    public void initialise(List<Item> read) throws Exception {
         System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
         FirefoxOptions options = new FirefoxOptions();
         options.setHeadless(false);
@@ -49,7 +50,7 @@ public class Scrape implements InitializingBean {
 
         // get links from database
         List<String> Links = new ArrayList<>();
-        for (Item item : itemRepo.findAll()) {
+        for (Item item : read) {
             boolean isExist = contentRepo.existsByProductTitleEquals(item.getName());
             System.err.println(isExist);
             if (isExist) {
@@ -100,92 +101,122 @@ public class Scrape implements InitializingBean {
     }
 
     private Content scrapeDetails(String link, boolean isFirstLink) throws InterruptedException {
-        driver.get("https://viral-launch.com/sellers/launch-staging/pages/market-intelligence.html");
         //moving to page directly end
         Content content = new Content();
         JavascriptExecutor jse = (JavascriptExecutor) driver;
+        boolean isscraped = false;
+        int tried = 1;
+        driver.get("https://viral-launch.com/sellers/launch-staging/pages/market-intelligence.html");
         // searching start
-        if (true) {
-            WebElement searchBox = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[2]/form/div[1]/div/div/input");
-            searchBox.clear();
-            searchBox.sendKeys(link);
-            WebElement searchButton = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[2]/form/div[3]/div/button");
-            searchButton.click();
-
-        } else {
-            WebElement searchBox2 = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[1]/div/div[1]/div/div/div/div[1]/input");
-            searchBox2.clear();
-            searchBox2.sendKeys(link);
-            WebElement searchButton2 = driver.findElementByXPath("//*[@id=\"header_search_button\"]");
-            searchButton2.click();
-        }
-        // searching end
-
-        // collecting start
-        Thread.sleep(20000);
-        //market trends
-
-        try {
-            WebElement marketTrends = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[1]/div/div[1]/div/div[2]");
-            marketTrends.click();
-        } catch (NoSuchElementException e) {
-            try {
-                WebElement alert = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[6]/div/div[2]/button");
-                jse.executeScript("arguments[0].click();", alert);
-                content.setAvarage_price("");
-                content.setBest_selling_period("");
-                content.setIdea_source("");
-                content.setMonthly_revenue("");
-                content.setMonthly_sales("");
-                content.setPattern("");
-                content.setProductTitle(link);
-                content.setReview_increase("");
-                content.setSales_trend("");
-                content.setSell_well("");
-                content.setWarning("");
-                contentRepo.save(content);
+        while (!isscraped) {
+            tried++;
+            System.out.println("==================================" + tried);
+            if (tried > 5) {
                 return null;
-            } catch (Exception a) {
-                a.printStackTrace();
             }
+            try {
+                Thread.sleep(2000);
+                WebElement searchBox = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[2]/form/div[1]/div/div/input");
+                searchBox.clear();
+                searchBox.sendKeys(link);
+                WebElement searchButton = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[2]/form/div[3]/div/button");
+                searchButton.click();
+
+                // searching end
+
+                // collecting start
+                Thread.sleep(60000);
+                //market trends
+
+                try {
+                    WebElement marketTrends = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[1]/div/div[1]/div/div[2]");
+                    try {
+                        marketTrends.click();
+                    } catch (ElementClickInterceptedException r) {
+
+                    }
+                } catch (NoSuchElementException e) {
+                    try {
+                        WebElement alert = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[6]/div/div[2]/button");
+                        jse.executeScript("arguments[0].click();", alert);
+                        content.setAvarage_price("");
+                        content.setBest_selling_period("");
+                        content.setIdea_source("");
+                        content.setMonthly_revenue("");
+                        content.setMonthly_sales("");
+                        content.setPattern("");
+                        content.setProductTitle(link);
+                        content.setReview_increase("");
+                        content.setSales_trend("");
+                        content.setSell_well("");
+                        content.setWarning("");
+                        contentRepo.save(content);
+                        return null;
+                    } catch (Exception a) {
+                        a.printStackTrace();
+                    }
+                }
+
+
+                try {
+                    String avaragePrice = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
+                    String sellingPeriod = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
+                    String reviewIncease = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
+                    String salesTrend = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
+
+                    String ideaScore = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
+                    String possibleMonthlySale = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
+                    String sellwell = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
+                    String pattern = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
+                    String warining = "There are no tips, warnings, or alerts for this market.";
+                    try {
+                        warining = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[2]/div/div[2]").getAttribute("innerText");
+                    } catch (NoSuchElementException r) {
+                        System.out.println("no warnings");
+                        warining = "There are no tips, warnings, or alerts for this market.";
+                    }
+                    WebElement tbody = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[1]/div/div[1]/div[1]/div[2]/div[1]/div[2]/div[3]/table/tbody");
+                    String revenue = tbody.findElements(By.xpath("./*")).get(0).findElements(By.xpath("./*")).get(7).getAttribute("innerText");
+
+                    content.setAvarage_price(avaragePrice);
+                    content.setBest_selling_period(sellingPeriod);
+                    content.setIdea_source(ideaScore);
+                    content.setMonthly_revenue(revenue);
+                    content.setMonthly_sales(possibleMonthlySale);
+                    content.setPattern(pattern);
+                    content.setProductTitle(link);
+                    content.setReview_increase(reviewIncease);
+                    content.setSales_trend(salesTrend);
+                    content.setSell_well(sellwell);
+                    content.setWarning(warining.replace("\n", ", "));
+                    contentRepo.save(content);
+                    isscraped = true;
+                } catch (NoSuchElementException c) {
+                    try {
+                        WebElement alert = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[3]/div/div[3]/span/button[2]");
+                        jse.executeScript("arguments[0].click();", alert);
+                        c.printStackTrace();
+                        System.err.println("error .............. can not locate element === " + c.getMessage());
+                        continue;
+                    } catch (Exception f) {
+                        System.err.println("error .............. can not locate alert === " + c.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                driver.get("https://viral-launch.com/sellers/launch-staging/pages/market-intelligence.html");
+                System.err.println("retrying");
+            }
+            tried++;
         }
-
-
-        String avaragePrice = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
-        String sellingPeriod = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
-        String reviewIncease = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
-        String salesTrend = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
-
-        String ideaScore = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
-        String possibleMonthlySale = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
-        String sellwell = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
-        String pattern = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
-        String warining = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[2]/div/div[2]").getAttribute("innerText");
-
-        System.out.println(avaragePrice + " - " + sellingPeriod + " - " + reviewIncease + " - " + salesTrend);
-        System.out.println(ideaScore + " - " + possibleMonthlySale + " - " + sellwell + " - " + pattern + " - " + warining);
-
-        WebElement tbody = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[1]/div/div[1]/div[1]/div[2]/div[1]/div[2]/div[3]/table/tbody");
-        String revenue = tbody.findElements(By.xpath("./*")).get(0).findElements(By.xpath("./*")).get(7).getAttribute("innerText");
-
-        content.setAvarage_price(avaragePrice);
-        content.setBest_selling_period(sellingPeriod);
-        content.setIdea_source(ideaScore);
-        content.setMonthly_revenue(revenue);
-        content.setMonthly_sales(possibleMonthlySale);
-        content.setPattern(pattern);
-        content.setProductTitle(link);
-        content.setReview_increase(reviewIncease);
-        content.setSales_trend(salesTrend);
-        content.setSell_well(sellwell);
-        content.setWarning(warining.replace("\n", ", "));
-        contentRepo.save(content);
         return content;
     }
 
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.initialise();
+        ExcelReader reader = new ExcelReader();
+        List<Item> read = reader.read();
+        this.initialise(read);
     }
 }
