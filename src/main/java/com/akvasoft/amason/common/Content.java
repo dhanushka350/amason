@@ -7,29 +7,40 @@ import javax.persistence.*;
 public class Content {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
+    @Column(name = "ID")
     int id;
-    @Column(name = "productTitle")
+
+    @Column(name = "PRODUCT_TITLE")
     String productTitle;
-    @Column(name = "monthly_revenue")
+
+    @Column(name = "MONTHLY_REVENUE")
     String monthly_revenue;
-    @Column(name = "avarage_price")
+
+    @Column(name = "AVERAGE_PRICE_OVER_90_DAYS")
     String avarage_price;
-    @Column(name = "best_selling_period")
+
+    @Column(name = "BEST_SELLING_PERIOD")
     String best_selling_period;
-    @Column(name = "review_increase")
+
+    @Column(name = "RATE_OF_REVIEW_INCREASE")
     String review_increase;
-    @Column(name = "sales_trend")
+
+    @Column(name = "ANNUAL_SALES_TREND")
     String sales_trend;
-    @Column(name = "idea_source")
+
+    @Column(name = "PRODUCT_IDEA_SOURCE")
     String idea_source;
-    @Column(name = "monthly_sales")
+
+    @Column(name = "POSSIBLE_MONTHLY_SALES")
     String monthly_sales;
-    @Column(name = "sell_well")
+
+    @Column(name = "REVIEWS_NEED_TO_SELL_WELL")
     String sell_well;
-    @Column(name = "pattern")
+
+    @Column(name = "SALES_PATTERN_ANALYSIS")
     String pattern;
-    @Column(name = "warning")
+
+    @Column(name = "TIPS_WARNINGS_AND_ALERT")
     String warning;
 
     public String getProductTitle() {

@@ -22,7 +22,7 @@ import java.util.Vector;
 @Controller
 public class ExcelReader {
     String start = "Belleze 48\" Rectangular Faux Leather Linen Storage Ottoman Bench Footrest, Large Space";
-    String end = "CoverMates Window Air Conditioner Cover";
+    String end = "STERILITÉ 116 Quart/110 Liter Ultra Latch Box, Clear with a White Lid and Black Latches";
     boolean isItems = false;
 
     public List<Item> read() throws Exception {

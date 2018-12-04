@@ -115,7 +115,7 @@ public class Scrape implements InitializingBean {
                 return null;
             }
             try {
-                Thread.sleep(2000);
+                Thread.sleep(10000);
                 WebElement searchBox = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div/div[2]/form/div[1]/div/div/input");
                 searchBox.clear();
                 searchBox.sendKeys(link);
@@ -157,54 +157,57 @@ public class Scrape implements InitializingBean {
                     }
                 }
 
-
+                String avaragePrice = "";
                 try {
-                    String avaragePrice = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
-                    String sellingPeriod = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
-                    String reviewIncease = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
-                    String salesTrend = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
-
-                    String ideaScore = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
-                    String possibleMonthlySale = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
-                    String sellwell = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
-                    String pattern = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
-                    String warining = "There are no tips, warnings, or alerts for this market.";
-                    try {
-                        warining = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[2]/div/div[2]").getAttribute("innerText");
-                    } catch (NoSuchElementException r) {
-                        System.out.println("no warnings");
-                        warining = "There are no tips, warnings, or alerts for this market.";
-                    }
-                    WebElement tbody = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[1]/div/div[1]/div[1]/div[2]/div[1]/div[2]/div[3]/table/tbody");
-                    String revenue = tbody.findElements(By.xpath("./*")).get(0).findElements(By.xpath("./*")).get(7).getAttribute("innerText");
-
-                    content.setAvarage_price(avaragePrice);
-                    content.setBest_selling_period(sellingPeriod);
-                    content.setIdea_source(ideaScore);
-                    content.setMonthly_revenue(revenue);
-                    content.setMonthly_sales(possibleMonthlySale);
-                    content.setPattern(pattern);
-                    content.setProductTitle(link);
-                    content.setReview_increase(reviewIncease);
-                    content.setSales_trend(salesTrend);
-                    content.setSell_well(sellwell);
-                    content.setWarning(warining.replace("\n", ", "));
-                    contentRepo.save(content);
-                    isscraped = true;
+                    avaragePrice = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
                 } catch (NoSuchElementException c) {
                     try {
-                        WebElement alert = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[3]/div/div[3]/span/button[2]");
+                        WebElement alert = driver.findElementByCssSelector("div.el-dialog__footer:nth-child(3) > span:nth-child(1) > button:nth-child(2)");
                         jse.executeScript("arguments[0].click();", alert);
                         c.printStackTrace();
                         System.err.println("error .............. can not locate element === " + c.getMessage());
-                        continue;
+                        Thread.sleep(3000);
+//                        continue;
                     } catch (Exception f) {
                         System.err.println("error .............. can not locate alert === " + c.getMessage());
                     }
                 }
+                avaragePrice = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
+                String sellingPeriod = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
+                String reviewIncease = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
+                String salesTrend = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
+
+                String ideaScore = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[1]/p").getAttribute("innerText");
+                String possibleMonthlySale = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[2]/p").getAttribute("innerText");
+                String sellwell = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[3]/p").getAttribute("innerText");
+                String pattern = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[1]/div[4]/p").getAttribute("innerText");
+                String warining = "There are no tips, warnings, or alerts for this market.";
+                try {
+                    warining = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[3]/div[2]/div[2]/div/div[2]").getAttribute("innerText");
+                } catch (NoSuchElementException r) {
+                    System.out.println("no warnings");
+                    warining = "There are no tips, warnings, or alerts for this market.";
+                }
+                WebElement tbody = driver.findElementByXPath("/html/body/div[1]/div[2]/div[3]/div/div[2]/div/div/div[1]/div[2]/div[2]/div[1]/div/div[1]/div[1]/div[2]/div[1]/div[2]/div[3]/table/tbody");
+                String revenue = tbody.findElements(By.xpath("./*")).get(0).findElements(By.xpath("./*")).get(7).getAttribute("innerText");
+
+                content.setAvarage_price(avaragePrice);
+                content.setBest_selling_period(sellingPeriod);
+                content.setIdea_source(ideaScore);
+                content.setMonthly_revenue(revenue);
+                content.setMonthly_sales(possibleMonthlySale);
+                content.setPattern(pattern);
+                content.setProductTitle(link);
+                content.setReview_increase(reviewIncease);
+                content.setSales_trend(salesTrend);
+                content.setSell_well(sellwell);
+                content.setWarning(warining.replace("\n", ", "));
+                contentRepo.save(content);
+                isscraped = true;
             } catch (Exception e) {
                 e.printStackTrace();
                 driver.get("https://viral-launch.com/sellers/launch-staging/pages/market-intelligence.html");
+                Thread.sleep(5000);
                 System.err.println("retrying");
             }
             tried++;
